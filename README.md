@@ -1,7 +1,4 @@
-# Name:
-Kittles
-Whispurr
-Purrito
+# Whimsical Whispurr
 
 ### Welcome
 - Message on join for new members in #member-log with instructions on how to proceed on the server. 
