@@ -107,7 +107,7 @@ public class Main {
 		bot.addCustomListener((event)->{
 			try {
 				GuildMemberJoinEvent e = (GuildMemberJoinEvent)event;
-				//				bot.sendMessage(e.g);
+				bot.sendMessage(e.getGuild().getSystemChannel(),"Welcome! "+e.getMember().getAsMention()+", check out our "+bot.getChannel(e.getGuild(),"rules").getAsMention()+" and then post an app in " + bot.getChannel(e.getGuild(),"whitelist-apps").getAsMention() + " and leadership will either message you privately or in " + bot.getChannel(e.getGuild(),"general").getAsMention() + ". You can also choose to hang out in general and get to know some of us before you post an app. Any questions you might have can be posted in general as well! If you have been accepted please head over to " + bot.getChannel(e.getGuild(),"role-claim").getAsMention() + " and add the server(s) you wish to get updates for!");
 				//e.getMember()
 			} catch (Exception e) {
 
