@@ -13,8 +13,13 @@ import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.Permission;
+import net.dv8tion.jda.core.entities.Channel;
 import net.dv8tion.jda.core.entities.Game;
+import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.entities.MessageEmbed;
+import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.events.Event;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
@@ -99,6 +104,12 @@ public class Bot {
 		}
 		return true;
 	}
+	public void sendMessage(MessageChannel channel, String message) {
+		channel.sendMessage(message).queue();
+	}
+	public void sendMessage(MessageChannel channel, MessageEmbed message) {
+		channel.sendMessage(message).queue();
+	}
 	public void addCustomCommand(String name, String command, String pattern, String helpString, CustomCommandHandler handler) {
 		commands.add(new CustomCommand(name, command, Pattern.compile("^!"+pattern,Pattern.CASE_INSENSITIVE|Pattern.MULTILINE), handler, helpString));
 	}
@@ -110,5 +121,8 @@ public class Bot {
 	}
 	public boolean hasMessageListener(String id) {
 		return messageHandlers.containsKey(id);
+	}
+	public TextChannel getChannel(Guild guild, String name) {
+		return guild.getTextChannelsByName(name, true).get(0);
 	}
 }

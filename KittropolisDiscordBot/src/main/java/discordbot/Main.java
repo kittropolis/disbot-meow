@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Role;
+import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 
 public class Main {
 	public static final Bot bot = new Bot();
@@ -20,13 +20,13 @@ public class Main {
 		bot.setToken(token);
 		bot.init();
 		threads = new HashMap<Guild,ArrayList<Thread>>();
-//		bot.addCustomCommand("command", "name", "regex", "help", (event, params) -> {});
+		//		bot.addCustomCommand("command", "name", "regex", "help", (event, params) -> {});
 		bot.addCustomCommand("Ping","ping","ping","Ping the bot", (event, params) -> {
-			event.getChannel().sendMessage("Pong").queue();
+			bot.sendMessage(event.getChannel(),"Pong");
 		});
 		bot.addCustomCommand("Stahp", "stahp", "stahp", "Stahp running actions", (event,params) -> {
 			if (!Bot.hasPermission(Permission.ADMINISTRATOR, event.getMember())) {
-				event.getChannel().sendMessage("Nice try " + event.getAuthor().getAsMention() + ", but I only listen to cool kids, like the server admins").queue();
+				bot.sendMessage(event.getChannel(),"Nice try " + event.getAuthor().getAsMention() + ", but I only listen to cool kids, like the server admins");
 			} else {
 				for (Thread t: threads.get(event.getGuild())) {
 					t.interrupt();
@@ -35,21 +35,21 @@ public class Main {
 		});
 		bot.addCustomCommand("Copy", "copy", "copy (.*)", "Copy message", (event,params) -> {
 			if (!Bot.hasPermission(Permission.ADMINISTRATOR, event.getMember())) {
-				event.getChannel().sendMessage("Nice try " + event.getAuthor().getAsMention() + ", but I only listen to cool kids, like the server admins").queue();
+				bot.sendMessage(event.getChannel(),"Nice try " + event.getAuthor().getAsMention() + ", but I only listen to cool kids, like the server admins");
 			} else {
-				event.getChannel().sendMessage(params[0]).queue();
+				bot.sendMessage(event.getChannel(),params[0]);
 			}
 		});
 		bot.addCustomCommand("Spam", "spam", "spam (\\d+) (.*)", "Spam message", (event,params) -> {
 			if (!Bot.hasPermission(Permission.ADMINISTRATOR, event.getMember())) {
-				event.getChannel().sendMessage("Nice try " + event.getAuthor().getAsMention() + ", but I only listen to cool kids, like the server admins").queue();
+				bot.sendMessage(event.getChannel(),"Nice try " + event.getAuthor().getAsMention() + ", but I only listen to cool kids, like the server admins");
 			} else {
 				if (!threads.containsKey(event.getGuild())) {
 					threads.put(event.getGuild(), new ArrayList<Thread>());
 				}
 				Thread t = new Thread(() -> {
 					for (int i = 0; i < Integer.parseInt(params[0]); i++) {
-						event.getChannel().sendMessage(params[1]).queue();
+						bot.sendMessage(event.getChannel(),params[1]);
 					}
 					threads.get(event.getGuild()).remove(Thread.currentThread());
 				});
@@ -58,18 +58,18 @@ public class Main {
 			}
 		});
 		bot.addCustomCommand("Get Invite", "getinvite", "getinvite", "Get invite link", (event,params) -> {
-			event.getChannel().sendMessage(event.getGuild().getDefaultChannel().createInvite().complete().getURL()).queue();
+			bot.sendMessage(event.getChannel(),event.getGuild().getDefaultChannel().createInvite().complete().getURL());
 		});
 		bot.addCustomCommand("Stop Bot", "stop", "stop", "Stop Bot", (event,params) -> {
 			if (!Bot.hasPermission(Permission.ADMINISTRATOR, event.getMember())) {
-				event.getChannel().sendMessage("Nice try " + event.getAuthor().getAsMention() + ", but I only listen to cool kids, like the server admins").queue();
+				bot.sendMessage(event.getChannel(),"Nice try " + event.getAuthor().getAsMention() + ", but I only listen to cool kids, like the server admins");
 			} else {
 				System.exit(1);
 			}
 		});
 		bot.addCustomCommand("Get Permissions", "getperms", "getperms(?: (?:(<@!?(\\d+)>)|(\\d+)))?", "Get permissions for user or role", (event,params) -> {
 			if (!Bot.hasPermission(Permission.ADMINISTRATOR, event.getMember())) {
-				event.getChannel().sendMessage("Nice try " + event.getAuthor().getAsMention() + ", but I only listen to cool kids, like the server admins").queue();
+				bot.sendMessage(event.getChannel(),"Nice try " + event.getAuthor().getAsMention() + ", but I only listen to cool kids, like the server admins");
 			} else {
 				EmbedBuilder t = new EmbedBuilder();
 				t.setColor(Color.HSBtoRGB((float)Math.random(), 1.0f, 1.0f));
@@ -93,30 +93,40 @@ public class Main {
 					h = event.getGuild().getRoleById(params[2]).getName()+"'s permissions";
 				}
 				t.addField(h, s.trim(), false);
-				event.getChannel().sendMessage(t.build()).queue();
+				bot.sendMessage(event.getChannel(),t.build());
 			}
 		});
 		bot.addCustomCommand("Get Avatar","getavatar","getavatar <@!?(\\d+)>","Get users avatar", (event, params) -> {
 			if (!Bot.hasPermission(Permission.ADMINISTRATOR, event.getMember())) {
-				event.getChannel().sendMessage("Nice try " + event.getAuthor().getAsMention() + ", but I only listen to cool kids, like the server admins").queue();
+				bot.sendMessage(event.getChannel(),"Nice try " + event.getAuthor().getAsMention() + ", but I only listen to cool kids, like the server admins");
 			} else {
-				event.getChannel().sendMessage(event.getGuild().getMemberById(params[0]).getUser().getAvatarUrl()).queue();
+				bot.sendMessage(event.getChannel(), event.getGuild().getMemberById(params[0]).getUser().getAvatarUrl());
+			}
+		});
+
+		bot.addCustomListener((event)->{
+			try {
+				GuildMemberJoinEvent e = (GuildMemberJoinEvent)event;
+				bot.sendMessage(e.getGuild().getSystemChannel(),"Welcome! "+e.getMember().getAsMention()+", check out our "+bot.getChannel(e.getGuild(),"rules").getAsMention()+" and then post an app in " + bot.getChannel(e.getGuild(),"whitelist-apps").getAsMention() + " and leadership will either message you privately or in " + bot.getChannel(e.getGuild(),"general").getAsMention() + ". You can also choose to hang out in general and get to know some of us before you post an app. Any questions you might have can be posted in general as well! If you have been accepted please head over to " + bot.getChannel(e.getGuild(),"role-claim").getAsMention() + " and add the server(s) you wish to get updates for!");
+				//e.getMember()
+			} catch (Exception e) {
+
 			}
 		});
 		/*
 		bot.addCustomCommand("", "", "", "", (event,params) -> {
 			if (!Bot.hasPermission(Permission.ADMINISTRATOR, event.getMember())) {
-				event.getChannel().sendMessage("Nice try " + event.getAuthor().getAsMention() + ", but I only listen to cool kids, like the server admins and " + event.getJDA().getUserById(Bot.ME).getAsMention()).queue();
+bot.sendMessage(event.getChannel(),"Nice try " + event.getAuthor().getAsMention() + ", but I only listen to cool kids, like the server admins and " + event.getJDA().getUserById(Bot.ME).getAsMention());
 			} else {
-				
+
 			}
 		});
-		*/
+		 */
 		/*
 		 * 
 		 */
 	}
-	
+
 	@SuppressWarnings("unused")
 	private static int count(String string, String param) {
 		int c = 0;
