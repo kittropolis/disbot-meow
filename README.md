@@ -8,9 +8,9 @@ Royal Guard and higher leadership are expected to greet and help newcomers out i
 ### Application Process
 Process the application with a very small interview and chat about their app! Ask a few questions.
 - Record whitelist additions.
->+ign @User Name
+>!ign @User Name
 - List whitelisted players and their Discord tags.
->+ign list
+>!ign list
 
 ### Roles
 - Add/remove role to User when reacting to a predefined emote on a predefined message.
@@ -20,6 +20,6 @@ Process the application with a very small interview and chat about their app! As
 ### Rep System
 Used to promote player interaction with rewards/punishments. Limited to 1 rep per timeframe, up to a maximum of 10.
 - Command to add reputation to a User.
->+1 @User, "Reason"!
+>!rep +1 @User, "Reason"!
 - Command to remove reputation from a User.
->-1 @User, "Reason"!
+>!rep -1 @User, "Reason"!
