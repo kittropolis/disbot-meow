@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,7 +98,6 @@ public class Main {
 						t.setColor(Color.HSBtoRGB((float) Math.random(), 1.0f, 1.0f));
 						String s = "";
 						String h = "";
-						System.out.println(String.join("\t", params));
 						if (params[0].equals("")) {
 							for (final Permission f : Permission.getPermissions(Permission.ALL_PERMISSIONS)) {
 								s += f.getName() + "\n";
@@ -128,6 +128,132 @@ public class Main {
 								event.getGuild().getMemberById(params[0]).getUser().getAvatarUrl());
 					}
 				});
+		Main.bot.addCustomCommand("Reputation", "rep", "rep ((?:(?:\\+|-)\\d+)|list|get)(?: <@!?(\\d+)>)?(?: ?(.+))?",
+				"Add or Remove Reputation", (event, params) -> {
+					if (params[0].equals("list")) {
+						try (BufferedReader br = new BufferedReader(new FileReader("rep.txt"))) {
+							final EmbedBuilder t = new EmbedBuilder();
+							t.setColor(Color.HSBtoRGB((float) Math.random(), 1.0f, 1.0f));
+							t.setTitle("Player Rep List");
+							String line;
+							while ((line = br.readLine()) != null) {
+								final Matcher m = Pattern
+										.compile("(\\d+) (-?\\d+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE)
+										.matcher(line);
+								if (m.find()) {
+									final String id = m.group(1);
+									final String rep = m.group(2);
+									t.addField("" + Main.bot.getMember(event.getGuild(), id).getEffectiveName() + "#"
+											+ Main.bot.getMember(event.getGuild(), id).getUser().getDiscriminator(),
+											rep, true);
+								}
+							}
+							Main.bot.sendMessage(event.getChannel(), t.build());
+						} catch (final Exception e) {
+							System.out.println(e);
+						}
+					} else if (params[0].equals("get")) {
+						try (BufferedReader br = new BufferedReader(new FileReader("rep.txt"))) {
+							final EmbedBuilder t = new EmbedBuilder();
+							t.setColor(Color.HSBtoRGB((float) Math.random(), 1.0f, 1.0f));
+							t.setTitle("Player Rep List");
+							String line;
+							while ((line = br.readLine()) != null) {
+								final Matcher m = Pattern
+										.compile("(\\d+) (-?\\d+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE)
+										.matcher(line);
+								if (m.find()) {
+									final String id = m.group(1);
+									final String name = m.group(2);
+									if (id.equals(params[1])) {
+										t.addField(Main.bot.getMember(event.getGuild(), id).getEffectiveName() + "#"
+												+ Main.bot.getMember(event.getGuild(), id).getUser().getDiscriminator(),
+												name, true);
+									}
+								}
+							}
+							Main.bot.sendMessage(event.getChannel(), t.build());
+						} catch (final Exception e) {
+							System.out.println(e);
+						}
+					} else {
+						final int rep = Integer.parseInt(params[0]);
+						if ((rep != 1) && !Bot.hasPermission(Permission.ADMINISTRATOR, event.getMember())) {
+							Main.bot.sendMessage(event.getChannel(), "Nice try " + event.getAuthor().getAsMention()
+									+ ", but I only listen to cool kids, like the server admins");
+						} else {
+							if (!Bot.hasPermission(Permission.ADMINISTRATOR, event.getMember())) {
+								try (BufferedReader br = new BufferedReader(new FileReader("repTimer.txt"))) {
+									String line;
+									while ((line = br.readLine()) != null) {
+										final Matcher m = Pattern.compile("(\\d+) (-?\\d+)",
+												Pattern.CASE_INSENSITIVE | Pattern.MULTILINE).matcher(line);
+										if (m.find() && m.group(1).equals(params[1])) {
+											final Date last = new Date();
+											last.setTime(Long.parseLong(m.group(2)));
+											final long delay = 1 * 7 * 24 * 60 * 60 * 1000;
+											last.setTime(last.getTime() + delay);
+											final Date now = new Date();
+											if (!now.after(last)) {
+												Main.bot.sendMessage(event.getChannel(),
+														"Sorry, you need to wait a little longer before you can give rep");
+												return;
+											}
+										}
+									}
+								} catch (final Exception e) {
+									System.out.println(e);
+								}
+							}
+							final HashMap<String, String> reps = new HashMap<>();
+							try (BufferedReader br = new BufferedReader(new FileReader("rep.txt"))) {
+								String line;
+								while ((line = br.readLine()) != null) {
+									final Matcher m = Pattern
+											.compile("(\\d+) (-?\\d+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE)
+											.matcher(line);
+									if (m.find()) {
+										reps.put(m.group(1), m.group(2));
+									}
+								}
+							} catch (final Exception e) {
+								System.out.println(e);
+							}
+							reps.put(params[1], "" + (rep + Integer.parseInt(reps.getOrDefault(params[1], "0"))));
+							try (FileWriter fw = new FileWriter("rep.txt")) {
+								for (final String key : reps.keySet()) {
+									fw.write(key + " " + reps.get(key) + "\n");
+								}
+							} catch (final Exception e) {
+								System.out.println(e);
+							}
+							final HashMap<String, String> dates = new HashMap<>();
+							try (BufferedReader br = new BufferedReader(new FileReader("repTimer.txt"))) {
+								String line;
+								while ((line = br.readLine()) != null) {
+									final Matcher m = Pattern
+											.compile("(\\d+) (\\d+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE)
+											.matcher(line);
+									if (m.find()) {
+										dates.put(m.group(1), m.group(2));
+									}
+								}
+							} catch (final Exception e) {
+								System.out.println(e);
+							}
+							dates.put(params[1], "" + new Date().getTime());
+
+							try (FileWriter fw = new FileWriter("repTimer.txt")) {
+								for (final String key : dates.keySet()) {
+									fw.write(key + " " + dates.get(key) + "\n");
+								}
+							} catch (final Exception e) {
+								System.out.println(e);
+							}
+							new Date();
+						}
+					}
+				});
 		Main.bot.addCustomCommand("IGN", "ign", "ign (list|find|<@!?(\\d+)>) ?(.*)", "IGN commands",
 				(event, params) -> {
 					if (params[0].equalsIgnoreCase("list")) {
@@ -155,7 +281,6 @@ public class Main {
 					} else if (params[0].equalsIgnoreCase("find")) {
 						final Matcher p = Pattern.compile("<@!?(\\d+)>", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE)
 								.matcher(params[2]);
-
 						final String str = ((p.find()) ? p.group(1) : params[2]).trim();
 						try (BufferedReader br = new BufferedReader(new FileReader("ign.txt"))) {
 							final EmbedBuilder t = new EmbedBuilder();
@@ -169,7 +294,6 @@ public class Main {
 								if (m.find()) {
 									final String id = m.group(1);
 									final String name = m.group(2);
-									System.out.println(name + "|\t|" + str);
 									if (id.equals(str) || name.toLowerCase().contains(str.toLowerCase())) {
 										t.addField(Main.bot.getMember(event.getGuild(), id).getEffectiveName() + "#"
 												+ Main.bot.getMember(event.getGuild(), id).getUser().getDiscriminator(),
@@ -180,7 +304,6 @@ public class Main {
 							Main.bot.sendMessage(event.getChannel(), t.build());
 						} catch (final Exception e) {
 							System.out.println(e);
-
 						}
 					} else {
 						if (!params[1].equals(event.getAuthor().getId())
@@ -202,7 +325,6 @@ public class Main {
 							} catch (final Exception e) {
 								System.out.println(e);
 							}
-							System.out.println(igns);
 							if (!igns.containsKey(params[1])) {
 								try (FileWriter fw = new FileWriter("ign.txt", true)) {
 									fw.write(params[1] + " " + params[2].trim() + "\n");
@@ -227,100 +349,7 @@ public class Main {
 						}
 					}
 				});
-//		Main.bot.addCustomCommand("Set IGN", "ign", "ign <@!?(\\d+)> (.*)", "Set IGN", (event, params) -> {
-//			if (!params[0].equals(event.getAuthor().getId())
-//					&& !Bot.hasPermission(Permission.ADMINISTRATOR, event.getMember())) {
-//				Main.bot.sendMessage(event.getChannel(), "Nice try " + event.getAuthor().getAsMention()
-//						+ ", but I only listen to cool kids, like the server admins");
-//			} else {
-//				final HashMap<String, String> igns = new HashMap<>();
-//				try (BufferedReader br = new BufferedReader(new FileReader("ign.txt"))) {
-//					String line;
-//					while ((line = br.readLine()) != null) {
-//						final Matcher m = Pattern.compile("(\\d+) (.+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE)
-//								.matcher(line);
-//						if (m.find()) {
-//							igns.put(m.group(1), m.group(2));
-//						}
-//					}
-//				} catch (final Exception e) {
-//					System.out.println(e);
-//				}
-//				System.out.println(igns);
-//				if (!igns.containsKey(params[0])) {
-//					try (FileWriter fw = new FileWriter("ign.txt", true)) {
-//						fw.write(params[0] + " " + params[1].trim() + "\n");
-//					} catch (final Exception e) {
-//						System.out.println(e);
-//					}
-//				} else {
-//					try (FileWriter fw = new FileWriter("ign.txt")) {
-//						boolean written = false;
-//						for (final String key : igns.keySet()) {
-//							if (!written && key.equals(params[0])) {
-//								fw.write(params[0] + " " + params[1] + "\n");
-//								written = true;
-//							} else {
-//								fw.write(key + " " + igns.get(key) + "\n");
-//							}
-//						}
-//					} catch (final Exception e) {
-//						System.out.println(e);
-//					}
-//				}
-//			}
-//		});
-//		Main.bot.addCustomCommand("List IGNs", "ign", "ign find <@!?(\\d+)>", "List IGNs", (event, params) -> {
-//			try (BufferedReader br = new BufferedReader(new FileReader("ign.txt"))) {
-//				final EmbedBuilder t = new EmbedBuilder();
-//				t.setColor(Color.HSBtoRGB((float) Math.random(), 1.0f, 1.0f));
-//				t.setTitle("Player IGN List");
-//				String line;
-//				while ((line = br.readLine()) != null) {
-//					final Matcher m = Pattern.compile("(\\d+) (.+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE)
-//							.matcher(line);
-//					if (m.find()) {
-//						final String id = m.group(1);
-//						final String name = m.group(2);
-//						if (id.equals(params[0])) {
-//							t.addField(
-//									Main.bot.getMember(event.getGuild(), id).getEffectiveName() + "#"
-//											+ Main.bot.getMember(event.getGuild(), id).getUser().getDiscriminator(),
-//									name, true);
-//						}
-//					}
-//				}
-//				Main.bot.sendMessage(event.getChannel(), t.build());
-//			} catch (final Exception e) {
-//				System.out.println(e);
-//			}
-//		});
-//		Main.bot.addCustomCommand("List IGNs", "ign", "ign list", "List IGNs", (event, params) -> {
-//			try (BufferedReader br = new BufferedReader(new FileReader("ign.txt"))) {
-//				final EmbedBuilder t = new EmbedBuilder();
-//				t.setColor(Color.HSBtoRGB((float) Math.random(), 1.0f, 1.0f));
-//				t.setTitle("Player IGN List");
-//				String line;
-//				while ((line = br.readLine()) != null) {
-//					final Matcher m = Pattern.compile("(\\d+) (.+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE)
-//							.matcher(line);
-//					if (m.find()) {
-//						final String id = m.group(1);
-//						final String name = m.group(2);
-//						t.addField(
-//								"" + Main.bot.getMember(event.getGuild(), id).getEffectiveName() + "#"
-//										+ Main.bot.getMember(event.getGuild(), id).getUser().getDiscriminator(),
-//								name, true);
-//					}
-//				}
-//				Main.bot.sendMessage(event.getChannel(), t.build());
-//			} catch (final Exception e) {
-//				System.out.println(e);
-//			}
-//		});
-		Main.bot.addCustomListener((event) ->
-
-		{
+		Main.bot.addCustomListener((event) -> {
 			if (event.getClass().equals(GuildMemberJoinEvent.class)) {
 				final GuildMemberJoinEvent e = (GuildMemberJoinEvent) event;
 				Main.bot.sendMessage(e.getGuild().getSystemChannel(), "Welcome! " + e.getMember().getAsMention()
