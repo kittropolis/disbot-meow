@@ -13,10 +13,13 @@ import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.Permission;
+import net.dv8tion.jda.core.entities.Channel;
 import net.dv8tion.jda.core.entities.Game;
+import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.MessageEmbed;
+import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.events.Event;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
@@ -118,5 +121,8 @@ public class Bot {
 	}
 	public boolean hasMessageListener(String id) {
 		return messageHandlers.containsKey(id);
+	}
+	public TextChannel getChannel(Guild guild, String name) {
+		return guild.getTextChannelsByName(name, true).get(0);
 	}
 }
