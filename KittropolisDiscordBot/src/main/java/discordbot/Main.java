@@ -185,7 +185,10 @@ public class Main {
 					if (m.find()) {
 						final String id = m.group(1);
 						final String name = m.group(2);
-						t.addField(Main.bot.getMember(event.getGuild(), id).getEffectiveName(), name, true);
+						t.addField(
+								"" + Main.bot.getMember(event.getGuild(), id).getEffectiveName() + "#"
+										+ Main.bot.getMember(event.getGuild(), id).getUser().getDiscriminator(),
+								name, true);
 					}
 				}
 				Main.bot.sendMessage(event.getChannel(), t.build());
