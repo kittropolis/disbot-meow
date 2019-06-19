@@ -13,7 +13,6 @@ import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.Channel;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
@@ -126,5 +125,8 @@ public class Bot {
 //		System.out.println(guild.getTextChannels());
 //		System.out.println(name);
 		return guild.getTextChannelsByName(name, true).get(0);
+	}
+	public Member getMember(Guild guild, String id) {
+		return guild.getMemberById(id);
 	}
 }
