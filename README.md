@@ -2,7 +2,7 @@
 
 ### Welcome
 Royal Guard and higher leadership are expected to greet and help newcomers out in #general with any questions or concerns they might have.
-- They will recieve a message on join in #member-log with instructions on how to proceed on the server. 
+- They will recieve a message on join in #member-log with instructions on how to proceed on the server.
 >Welcome! $mention, check out our #rules and then post in #whitelist-apps and leadership will either message you privately or in #general. You can also choose to hang out in general and get to know us before you post an app. Any questions you might have can be posted in general as well! If you have been accepted please head over to #role-claim and add the server(s) you wish to get updates for!
 
 ### Application Commands
@@ -12,9 +12,9 @@ Process the application with a very small interview and chat about their app! As
 - List whitelisted players and their Discord tags.
 >!ign list
 - Find IGN by User
->!whois User
+>!ign find @user#123
 - Find User by IGN
->!whois IGN
+>!ign find IGN
 
 ### Role Claim
 - Add/remove role to User when reacting to a predefined emote on a predefined message.
