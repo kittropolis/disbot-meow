@@ -128,76 +128,199 @@ public class Main {
 								event.getGuild().getMemberById(params[0]).getUser().getAvatarUrl());
 					}
 				});
-		Main.bot.addCustomCommand("Set IGN", "ign", "ign <@!?(\\d+)> (.*)", "Set IGN", (event, params) -> {
-			if (!params[0].equals(event.getAuthor().getId())
-					&& !Bot.hasPermission(Permission.ADMINISTRATOR, event.getMember())) {
-				Main.bot.sendMessage(event.getChannel(), "Nice try " + event.getAuthor().getAsMention()
-						+ ", but I only listen to cool kids, like the server admins");
-			} else {
-				final HashMap<String, String> igns = new HashMap<>();
-				try (BufferedReader br = new BufferedReader(new FileReader("ign.txt"))) {
-					String line;
-					while ((line = br.readLine()) != null) {
-						final Matcher m = Pattern.compile("(\\d+) (.+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE)
-								.matcher(line);
-						if (m.find()) {
-							igns.put(m.group(1), m.group(2));
+		Main.bot.addCustomCommand("IGN", "ign", "ign (list|find|<@!?(\\d+)>) ?(.*)", "IGN commands",
+				(event, params) -> {
+					if (params[0].equalsIgnoreCase("list")) {
+						try (BufferedReader br = new BufferedReader(new FileReader("ign.txt"))) {
+							final EmbedBuilder t = new EmbedBuilder();
+							t.setColor(Color.HSBtoRGB((float) Math.random(), 1.0f, 1.0f));
+							t.setTitle("Player IGN List");
+							String line;
+							while ((line = br.readLine()) != null) {
+								final Matcher m = Pattern
+										.compile("(\\d+) (.+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE)
+										.matcher(line);
+								if (m.find()) {
+									final String id = m.group(1);
+									final String name = m.group(2);
+									t.addField("" + Main.bot.getMember(event.getGuild(), id).getEffectiveName() + "#"
+											+ Main.bot.getMember(event.getGuild(), id).getUser().getDiscriminator(),
+											name, true);
+								}
+							}
+							Main.bot.sendMessage(event.getChannel(), t.build());
+						} catch (final Exception e) {
+							System.out.println(e);
 						}
-					}
-				} catch (final Exception e) {
-					System.out.println(e);
-				}
-				System.out.println(igns);
-				if (!igns.containsKey(params[0])) {
-					try (FileWriter fw = new FileWriter("ign.txt", true)) {
-						fw.write(params[0] + " " + params[1].trim() + "\n");
-					} catch (final Exception e) {
-						System.out.println(e);
-					}
-				} else {
-					try (FileWriter fw = new FileWriter("ign.txt")) {
-						boolean written = false;
-						for (final String key : igns.keySet()) {
-							if (!written && key.equals(params[0])) {
-								fw.write(params[0] + " " + params[1] + "\n");
-								written = true;
+					} else if (params[0].equalsIgnoreCase("find")) {
+						final Matcher p = Pattern.compile("<@!?(\\d+)>", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE)
+								.matcher(params[2]);
+
+						final String str = ((p.find()) ? p.group(1) : params[2]).trim();
+						try (BufferedReader br = new BufferedReader(new FileReader("ign.txt"))) {
+							final EmbedBuilder t = new EmbedBuilder();
+							t.setColor(Color.HSBtoRGB((float) Math.random(), 1.0f, 1.0f));
+							t.setTitle("Player IGN List");
+							String line;
+							while ((line = br.readLine()) != null) {
+								final Matcher m = Pattern
+										.compile("(\\d+) (.+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE)
+										.matcher(line);
+								if (m.find()) {
+									final String id = m.group(1);
+									final String name = m.group(2);
+									System.out.println(name + "|\t|" + str);
+									if (id.equals(str) || name.toLowerCase().contains(str.toLowerCase())) {
+										t.addField(Main.bot.getMember(event.getGuild(), id).getEffectiveName() + "#"
+												+ Main.bot.getMember(event.getGuild(), id).getUser().getDiscriminator(),
+												name, true);
+									}
+								}
+							}
+							Main.bot.sendMessage(event.getChannel(), t.build());
+						} catch (final Exception e) {
+							System.out.println(e);
+
+						}
+					} else {
+						if (!params[1].equals(event.getAuthor().getId())
+								&& !Bot.hasPermission(Permission.ADMINISTRATOR, event.getMember())) {
+							Main.bot.sendMessage(event.getChannel(), "Nice try " + event.getAuthor().getAsMention()
+									+ ", but I only listen to cool kids, like the server admins");
+						} else {
+							final HashMap<String, String> igns = new HashMap<>();
+							try (BufferedReader br = new BufferedReader(new FileReader("ign.txt"))) {
+								String line;
+								while ((line = br.readLine()) != null) {
+									final Matcher m = Pattern
+											.compile("(\\d+) (.+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE)
+											.matcher(line);
+									if (m.find()) {
+										igns.put(m.group(1), m.group(2));
+									}
+								}
+							} catch (final Exception e) {
+								System.out.println(e);
+							}
+							System.out.println(igns);
+							if (!igns.containsKey(params[1])) {
+								try (FileWriter fw = new FileWriter("ign.txt", true)) {
+									fw.write(params[1] + " " + params[2].trim() + "\n");
+								} catch (final Exception e) {
+									System.out.println(e);
+								}
 							} else {
-								fw.write(key + " " + igns.get(key) + "\n");
+								try (FileWriter fw = new FileWriter("ign.txt")) {
+									boolean written = false;
+									for (final String key : igns.keySet()) {
+										if (!written && key.equals(params[1])) {
+											fw.write(params[1] + " " + params[2] + "\n");
+											written = true;
+										} else {
+											fw.write(key + " " + igns.get(key) + "\n");
+										}
+									}
+								} catch (final Exception e) {
+									System.out.println(e);
+								}
 							}
 						}
-					} catch (final Exception e) {
-						System.out.println(e);
 					}
-				}
-			}
-		});
-		Main.bot.addCustomCommand("List IGNs", "ign", "ign (list)", "List IGNs", (event, params) ->
+				});
+//		Main.bot.addCustomCommand("Set IGN", "ign", "ign <@!?(\\d+)> (.*)", "Set IGN", (event, params) -> {
+//			if (!params[0].equals(event.getAuthor().getId())
+//					&& !Bot.hasPermission(Permission.ADMINISTRATOR, event.getMember())) {
+//				Main.bot.sendMessage(event.getChannel(), "Nice try " + event.getAuthor().getAsMention()
+//						+ ", but I only listen to cool kids, like the server admins");
+//			} else {
+//				final HashMap<String, String> igns = new HashMap<>();
+//				try (BufferedReader br = new BufferedReader(new FileReader("ign.txt"))) {
+//					String line;
+//					while ((line = br.readLine()) != null) {
+//						final Matcher m = Pattern.compile("(\\d+) (.+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE)
+//								.matcher(line);
+//						if (m.find()) {
+//							igns.put(m.group(1), m.group(2));
+//						}
+//					}
+//				} catch (final Exception e) {
+//					System.out.println(e);
+//				}
+//				System.out.println(igns);
+//				if (!igns.containsKey(params[0])) {
+//					try (FileWriter fw = new FileWriter("ign.txt", true)) {
+//						fw.write(params[0] + " " + params[1].trim() + "\n");
+//					} catch (final Exception e) {
+//						System.out.println(e);
+//					}
+//				} else {
+//					try (FileWriter fw = new FileWriter("ign.txt")) {
+//						boolean written = false;
+//						for (final String key : igns.keySet()) {
+//							if (!written && key.equals(params[0])) {
+//								fw.write(params[0] + " " + params[1] + "\n");
+//								written = true;
+//							} else {
+//								fw.write(key + " " + igns.get(key) + "\n");
+//							}
+//						}
+//					} catch (final Exception e) {
+//						System.out.println(e);
+//					}
+//				}
+//			}
+//		});
+//		Main.bot.addCustomCommand("List IGNs", "ign", "ign find <@!?(\\d+)>", "List IGNs", (event, params) -> {
+//			try (BufferedReader br = new BufferedReader(new FileReader("ign.txt"))) {
+//				final EmbedBuilder t = new EmbedBuilder();
+//				t.setColor(Color.HSBtoRGB((float) Math.random(), 1.0f, 1.0f));
+//				t.setTitle("Player IGN List");
+//				String line;
+//				while ((line = br.readLine()) != null) {
+//					final Matcher m = Pattern.compile("(\\d+) (.+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE)
+//							.matcher(line);
+//					if (m.find()) {
+//						final String id = m.group(1);
+//						final String name = m.group(2);
+//						if (id.equals(params[0])) {
+//							t.addField(
+//									Main.bot.getMember(event.getGuild(), id).getEffectiveName() + "#"
+//											+ Main.bot.getMember(event.getGuild(), id).getUser().getDiscriminator(),
+//									name, true);
+//						}
+//					}
+//				}
+//				Main.bot.sendMessage(event.getChannel(), t.build());
+//			} catch (final Exception e) {
+//				System.out.println(e);
+//			}
+//		});
+//		Main.bot.addCustomCommand("List IGNs", "ign", "ign list", "List IGNs", (event, params) -> {
+//			try (BufferedReader br = new BufferedReader(new FileReader("ign.txt"))) {
+//				final EmbedBuilder t = new EmbedBuilder();
+//				t.setColor(Color.HSBtoRGB((float) Math.random(), 1.0f, 1.0f));
+//				t.setTitle("Player IGN List");
+//				String line;
+//				while ((line = br.readLine()) != null) {
+//					final Matcher m = Pattern.compile("(\\d+) (.+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE)
+//							.matcher(line);
+//					if (m.find()) {
+//						final String id = m.group(1);
+//						final String name = m.group(2);
+//						t.addField(
+//								"" + Main.bot.getMember(event.getGuild(), id).getEffectiveName() + "#"
+//										+ Main.bot.getMember(event.getGuild(), id).getUser().getDiscriminator(),
+//								name, true);
+//					}
+//				}
+//				Main.bot.sendMessage(event.getChannel(), t.build());
+//			} catch (final Exception e) {
+//				System.out.println(e);
+//			}
+//		});
+		Main.bot.addCustomListener((event) ->
 
 		{
-			try (BufferedReader br = new BufferedReader(new FileReader("ign.txt"))) {
-				final EmbedBuilder t = new EmbedBuilder();
-				t.setColor(Color.HSBtoRGB((float) Math.random(), 1.0f, 1.0f));
-				t.setTitle("Player IGN List");
-				String line;
-				while ((line = br.readLine()) != null) {
-					final Matcher m = Pattern.compile("(\\d+) (.+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE)
-							.matcher(line);
-					if (m.find()) {
-						final String id = m.group(1);
-						final String name = m.group(2);
-						t.addField(
-								"" + Main.bot.getMember(event.getGuild(), id).getEffectiveName() + "#"
-										+ Main.bot.getMember(event.getGuild(), id).getUser().getDiscriminator(),
-								name, true);
-					}
-				}
-				Main.bot.sendMessage(event.getChannel(), t.build());
-			} catch (final Exception e) {
-				System.out.println(e);
-			}
-		});
-
-		Main.bot.addCustomListener((event) -> {
 			if (event.getClass().equals(GuildMemberJoinEvent.class)) {
 				final GuildMemberJoinEvent e = (GuildMemberJoinEvent) event;
 				Main.bot.sendMessage(e.getGuild().getSystemChannel(), "Welcome! " + e.getMember().getAsMention()
@@ -222,11 +345,11 @@ public class Main {
 		 * event.getAuthor().getAsMention() +
 		 * ", but I only listen to cool kids, like the server admins and " +
 		 * event.getJDA().getUserById(Bot.ME).getAsMention()); } else {
-		 * 
+		 *
 		 * } });
 		 */
 		/*
-		 * 
+		 *
 		 */
 	}
 }
