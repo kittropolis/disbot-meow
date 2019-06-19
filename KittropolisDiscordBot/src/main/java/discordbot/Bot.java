@@ -123,6 +123,8 @@ public class Bot {
 		return messageHandlers.containsKey(id);
 	}
 	public TextChannel getChannel(Guild guild, String name) {
+//		System.out.println(guild.getTextChannels());
+//		System.out.println(name);
 		return guild.getTextChannelsByName(name, true).get(0);
 	}
 }
