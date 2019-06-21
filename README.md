@@ -4,6 +4,8 @@
 Royal Guard and higher leadership are expected to greet and help newcomers out in #general with any questions or concerns they might have.
 - They will recieve a message on join in #member-log with instructions on how to proceed on the server.
 >Welcome! $mention, check out our #rules and then post in #whitelist-apps and leadership will either message you privately or in #general. You can also choose to hang out in general and get to know us before you post an app. Any questions you might have can be posted in general as well! If you have been accepted please head over to #role-claim and add the server(s) you wish to get updates for!
+- Leave messages
+>User has left Kittropolis!
 
 ### Application Commands
 Process the application with a very small interview and chat about their app! Ask a few questions.
@@ -17,6 +19,7 @@ Process the application with a very small interview and chat about their app! As
 >!ign find IGN
 
 ### Role Claim
+Allows for less use of the everyone ping.
 - Add/remove role to User when reacting to a predefined emote on a predefined message.
 >Look at #role-claim for example.
 - Add/remove additional reactions/roles to prefefined message(s).
@@ -28,3 +31,12 @@ Used to promote player interaction with rewards/punishments.
 >!rep +1 @User, "Reason"!
 - Command to remove reputation from a User.
 >!rep -1 @User, "Reason"!
+
+### Moderation
+Helps with the whitelist channel clearing, along with other things.
+- Command for pruning messages without deleting pinnned messages.
+>!prune "amount"/"user"
+
+## Staff Only
+- Changing Welcome/Leave messages
+- 
