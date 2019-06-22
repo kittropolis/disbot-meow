@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -15,8 +16,10 @@ import java.util.regex.Pattern;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.message.guild.react.GuildMessageReactionAddEvent;
+import net.dv8tion.jda.core.requests.restaction.pagination.MessagePaginationAction;
 
 public class Main {
 	public static final Bot bot = new Bot();
@@ -116,6 +119,41 @@ public class Main {
 						}
 						t.addField(h, s.trim(), false);
 						Main.bot.sendMessage(event.getChannel(), t.build());
+					}
+				});
+		Main.bot.addCustomCommand("Prune", "prune", "prune (?:<@!?(\\d+)> )?(\\d+) ?(clean)?", "Prune Messages",
+				(event, params) -> {
+					if (!Bot.hasPermission(Permission.ADMINISTRATOR, event.getMember())) {
+						Main.bot.sendMessage(event.getChannel(), "Nice try " + event.getAuthor().getAsMention()
+								+ ", but I only listen to cool kids, like the server admins");
+					} else {
+						final MessagePaginationAction history = event.getChannel().getIterableHistory();
+						final List<Message> list = new LinkedList<>();
+						if (params[0].length() != 0) {
+							for (final Message message : history) {
+								if (!message.getId().equals(event.getMessage().getId())
+										&& message.getAuthor().getId().equals(params[0]) && !message.isPinned()) {
+									list.add(message);
+								}
+								if (list.size() >= Integer.parseInt(params[1])) {
+									break;
+								}
+							}
+						} else {
+							for (final Message message : history) {
+								if (!message.getId().equals(event.getMessage().getId())
+										&& (list.size() < Integer.parseInt(params[1])) && !message.isPinned()) {
+									list.add(message);
+								}
+							}
+						}
+						System.out.println(params[2]);
+						if (!params[2].equals("clean")) {
+							Main.bot.sendMessage(event.getChannel(), "Deleting " + list.size() + " messages");
+						} else {
+							event.getMessage().delete().queue();
+						}
+						event.getChannel().purgeMessages(list);
 					}
 				});
 		Main.bot.addCustomCommand("Get Avatar", "getavatar", "getavatar <@!?(\\d+)>", "Get users avatar",
